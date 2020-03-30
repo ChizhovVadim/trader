@@ -97,17 +97,6 @@ func (quik *QuikService) DialAndServe(ctx context.Context) error {
 	defer callbackConn.Close()
 
 	var responses = make(chan string, 128)
-	var callbacks = make(chan string, 128)
-
-	go func() {
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case <-callbacks:
-			}
-		}
-	}()
 
 	go func() {
 		var err = readLines(ctx, quik.messageLogger, responses, mainConn)
@@ -118,7 +107,7 @@ func (quik *QuikService) DialAndServe(ctx context.Context) error {
 	}()
 
 	go func() {
-		var err = handleCallbacks(quik.callbackLogger, callbackConn, &quik.eventManager)
+		var err = handleCallbacks(ctx, quik.callbackLogger, callbackConn, &quik.eventManager)
 		if err != nil {
 			cancel()
 			quik.logger.Println(err)
@@ -246,7 +235,7 @@ const (
 	EventNameNewCandle      = "NewCandle"
 )
 
-func handleCallbacks(
+func handleCallbacks(ctx context.Context,
 	logger *log.Logger,
 	src io.Reader,
 	publisher Publisher) error {
