@@ -172,7 +172,7 @@ func (s *Strategy) executeAdvices(ctx context.Context,
 					"Advice", advice)
 			}
 			var position = amount / basePrice * advice.Position
-			var volume = int(position - float64(strategyPosition))
+			var volume = int(position - float64(strategyPosition)) //TODO размер лота
 			if volume == 0 {
 				continue
 			}

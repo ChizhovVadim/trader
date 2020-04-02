@@ -42,6 +42,12 @@ func main() {
 	var client = config.Clients[clientIndex]
 
 	var logFolder = path.Join(config.LogPath, client.Key)
+	err = os.MkdirAll(logFolder, os.ModePerm)
+	if err != nil {
+		fmt.Println("make log dir failed", err)
+		return
+	}
+
 	var dateName = time.Now().Format("2006-01-02")
 
 	// main log

@@ -97,7 +97,7 @@ func (quik *QuikService) SendTransaction(ctx context.Context,
 type CandleInterval int
 
 const (
-	CandleIntervalM5 = 5
+	CandleIntervalM5 CandleInterval = 5
 )
 
 type Candle struct {
