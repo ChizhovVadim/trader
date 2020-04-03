@@ -81,7 +81,7 @@ func (adv *Advisor) GetAdvices(ctx context.Context, security string, advices cha
 			return ctx.Err()
 		default:
 		}
-		var advice, err = adv.GetAdvice(security, since, Timeout)
+		var advice, err = adv.GetAdvice(ctx, security, since, Timeout)
 		if err != nil {
 			adv.logger.Println("GetAdvices error", err)
 			select {
@@ -122,7 +122,8 @@ func (adv *Advisor) PublishCandles(ctx context.Context, candles <-chan Candle) e
 	}
 }
 
-func (adv *Advisor) GetAdvice(securityCode string, since time.Time, timeout int) (Advice, error) {
+func (adv *Advisor) GetAdvice(ctx context.Context,
+	securityCode string, since time.Time, timeout int) (Advice, error) {
 	baseUrl, err := url.Parse(adv.url + "/api/advisors/" + securityCode)
 	if err != nil {
 		return Advice{}, err
@@ -136,7 +137,12 @@ func (adv *Advisor) GetAdvice(securityCode string, since time.Time, timeout int)
 
 	url := baseUrl.String()
 
-	resp, err := adv.httpClient.Get(url)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return Advice{}, err
+	}
+	req = req.WithContext(ctx)
+	resp, err := adv.httpClient.Do(req)
 	if err != nil {
 		return Advice{}, err
 	}
