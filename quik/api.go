@@ -19,12 +19,12 @@ func (n *Nullable) SetValid(v bool) {
 }
 
 func (quik *QuikService) IsConnected(ctx context.Context) (bool, error) {
-	var resp string
+	var resp int
 	var err = quik.executeQuery(ctx,
 		"isConnected",
 		"",
 		&resp)
-	return resp == "1", err
+	return resp == 1, err
 }
 
 type GetPortfolioInfoExRequest struct {

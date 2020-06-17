@@ -45,6 +45,15 @@ type Strategy struct {
 func (s *Strategy) Run(ctx context.Context) error {
 	s.logger.Println("Strategy starting...")
 
+	s.logger.Println("Check connection")
+	connected, err := s.quikService.IsConnected(ctx)
+	if err != nil {
+		return err
+	}
+	if !connected {
+		return errors.New("quik is not connected")
+	}
+
 	s.logger.Println("Init portfolio...")
 	amount, err := s.getAmount(ctx)
 	if err != nil {
@@ -77,6 +86,7 @@ func (s *Strategy) Run(ctx context.Context) error {
 		})
 
 		for _, security := range securities {
+			var security = security
 			g.Go(func() error {
 				return s.getCandles(ctx, security, candles)
 			})
@@ -84,6 +94,7 @@ func (s *Strategy) Run(ctx context.Context) error {
 	}
 
 	for _, security := range securities {
+		var security = security
 		var advices = make(chan Advice)
 
 		g.Go(func() error {

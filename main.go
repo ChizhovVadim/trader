@@ -22,7 +22,8 @@ import (
 var (
 	ErrNotImplemented = errors.New("not implemented")
 	flagClient        = flag.String("client", "", "client key")
-	buildCommit       string
+	gitRevision       string
+	buildDate         string
 )
 
 func main() {
@@ -63,7 +64,8 @@ func main() {
 	defer logger.Println("Application closed.")
 
 	logger.Println("Environment",
-		"BuildCommit", buildCommit,
+		"BuildDate", buildDate,
+		"GitRevision", gitRevision,
 		"RuntimeVersion", runtime.Version())
 
 	// quik message log
