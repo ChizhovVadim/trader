@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/ChizhovVadim/trader/quik"
-
 	"golang.org/x/sync/errgroup"
 )
 
@@ -332,7 +331,7 @@ func convertQuikCandle(security string, candle quik.Candle, loc *time.Location) 
 		SecurityCode: security,
 		DateTime:     convertQuikDateTime(candle.Datetime, loc),
 		ClosePrice:   candle.Close,
-		Volume:       float64(candle.Volume),
+		Volume:       candle.Volume,
 	}
 }
 

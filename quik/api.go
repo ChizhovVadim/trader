@@ -105,7 +105,7 @@ type Candle struct {
 	Close     float64        `json:"close"`
 	High      float64        `json:"high"`
 	Open      float64        `json:"open"`
-	Volume    int            `json:"volume"`
+	Volume    float64        `json:"volume"`
 	Datetime  QuikDateTime   `json:"datetime"`
 	SecCode   string         `json:"sec"`
 	ClassCode string         `json:"class"`
