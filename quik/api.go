@@ -20,7 +20,7 @@ func (n *Nullable) SetValid(v bool) {
 
 func (quik *QuikService) IsConnected(ctx context.Context) (bool, error) {
 	var resp int
-	var err = quik.executeQuery(ctx,
+	var err = quik.ExecuteQuery(ctx,
 		"isConnected",
 		"",
 		&resp)
@@ -41,7 +41,7 @@ type GetPortfolioInfoExResponse struct {
 func (quik *QuikService) GetPortfolioInfoEx(ctx context.Context,
 	req GetPortfolioInfoExRequest) (GetPortfolioInfoExResponse, error) {
 	var resp GetPortfolioInfoExResponse
-	var err = quik.executeQuery(ctx,
+	var err = quik.ExecuteQuery(ctx,
 		"getPortfolioInfoEx",
 		fmt.Sprintf("%v|%v|%v", req.FirmId, req.ClientCode, req.LimitKind),
 		&resp)
@@ -63,7 +63,7 @@ type GetFuturesHoldingResponse struct {
 func (quik *QuikService) GetFuturesHolding(ctx context.Context,
 	req GetFuturesHoldingRequest) (GetFuturesHoldingResponse, error) {
 	var resp GetFuturesHoldingResponse
-	var err = quik.executeQuery(ctx,
+	var err = quik.ExecuteQuery(ctx,
 		"getFuturesHolding",
 		fmt.Sprintf("%v|%v|%v|%v", req.FirmId, req.AccId, req.SecCode, req.PosType),
 		&resp)
@@ -88,7 +88,7 @@ func (quik *QuikService) SendTransaction(ctx context.Context,
 	req.TRANS_ID = fmt.Sprintf("%v", transId)
 	req.CLIENT_CODE = req.TRANS_ID
 	var resp bool
-	return quik.executeQuery(ctx,
+	return quik.ExecuteQuery(ctx,
 		"sendTransaction",
 		req,
 		&resp)
@@ -125,7 +125,7 @@ type QuikDateTime struct {
 func (quik *QuikService) GetLastCandles(ctx context.Context,
 	classCode, securityCode string, interval CandleInterval, count int) ([]Candle, error) {
 	var resp []Candle
-	var err = quik.executeQuery(ctx,
+	var err = quik.ExecuteQuery(ctx,
 		"get_candles_from_data_source",
 		fmt.Sprintf("%v|%v|%v|%v", classCode, securityCode, interval, count),
 		&resp)
@@ -135,7 +135,7 @@ func (quik *QuikService) GetLastCandles(ctx context.Context,
 func (quik *QuikService) SubscribeCandles(ctx context.Context,
 	classCode, securityCode string, interval CandleInterval) error {
 	var resp string
-	var err = quik.executeQuery(ctx,
+	var err = quik.ExecuteQuery(ctx,
 		"subscribe_to_candles",
 		fmt.Sprintf("%v|%v|%v", classCode, securityCode, interval),
 		&resp)
@@ -146,7 +146,7 @@ type TradeEventData struct {
 	TradeNum int64        `json:"trade_num"`
 	Account  string       `json:"account"`
 	Price    float64      `json:"price"`
-	Quantity int          `json:"qty"`
+	Quantity float64      `json:"qty"`
 	SecCode  string       `json:"sec_code"`
 	DateTime QuikDateTime `json:"datetime"`
 	TransID  int64        `json:"trans_id"`
