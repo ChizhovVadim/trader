@@ -1,6 +1,8 @@
 package quikservice
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func (quik *QuikService) IsConnected() (ResponseJson, error) {
 	return quik.MakeQuery("isConnected", "")
@@ -27,4 +29,46 @@ func (quik *QuikService) GetFuturesHolding(
 ) (ResponseJson, error) {
 	return quik.MakeQuery("getFuturesHolding",
 		fmt.Sprintf("%v|%v|%v|%v", firmId, accId, secCode, posType))
+}
+
+type Transaction struct {
+	TRANS_ID    string
+	ACTION      string
+	ACCOUNT     string
+	CLASSCODE   string
+	SECCODE     string
+	QUANTITY    string
+	OPERATION   string
+	PRICE       string
+	CLIENT_CODE string
+}
+
+func (quik *QuikService) SendTransaction(req Transaction) (ResponseJson, error) {
+	//Все значения должны передаваться в виде строк
+	return quik.MakeQuery("sendTransaction", req)
+}
+
+const (
+	CandleIntervalM5 int = 5
+)
+
+func (quik *QuikService) GetLastCandles(
+	classCode string,
+	securityCode string,
+	interval int,
+	count int,
+) (ResponseJson, error) {
+	return quik.MakeQuery(
+		"get_candles_from_data_source",
+		fmt.Sprintf("%v|%v|%v|%v", classCode, securityCode, interval, count))
+}
+
+func (quik *QuikService) SubscribeCandles(
+	classCode string,
+	securityCode string,
+	interval int,
+) (ResponseJson, error) {
+	return quik.MakeQuery(
+		"subscribe_to_candles",
+		fmt.Sprintf("%v|%v|%v", classCode, securityCode, interval))
 }

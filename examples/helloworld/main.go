@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -20,9 +21,12 @@ func main() {
 }
 
 func run(port int) error {
+	var ctx, cancel = context.WithCancel(context.Background())
+	defer cancel()
+
 	var quikService = quikservice.New(log.Default(), port, 1)
 	defer quikService.Close()
-	var err = quikService.Init()
+	var err = quikService.Init(ctx, nil)
 	if err != nil {
 		return err
 	}
@@ -31,13 +35,13 @@ func run(port int) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(data)
+	fmt.Printf("%#v\n", data)
 
 	data, err = quikService.MessageInfo("Где деньги, Лебовски?")
 	if err != nil {
 		return err
 	}
-	fmt.Println(data)
+	fmt.Printf("%#v\n", data)
 
 	return nil
 }

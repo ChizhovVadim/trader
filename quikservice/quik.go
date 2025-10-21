@@ -2,6 +2,7 @@ package quikservice
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -16,15 +17,14 @@ import (
 )
 
 type QuikService struct {
-	logger          *log.Logger
-	port            int
-	id              int64
-	mu              sync.Mutex
-	mainConn        net.Conn
-	callbackConn    net.Conn
-	reader          *bufio.Reader
-	writer          *transform.Writer
-	callbackHandler func(CallbackJson)
+	logger       *log.Logger
+	port         int
+	id           int64
+	mu           sync.Mutex
+	mainConn     net.Conn
+	reader       *bufio.Reader
+	writer       *transform.Writer
+	callbackConn net.Conn
 }
 
 func New(
@@ -39,7 +39,10 @@ func New(
 	}
 }
 
-func (quik *QuikService) Init() error {
+func (quik *QuikService) Init(
+	ctx context.Context,
+	callbackHandler func(context.Context, CallbackJson),
+) error {
 	mainConn, err := dial(quik.port)
 	if err != nil {
 		return err
@@ -57,8 +60,9 @@ func (quik *QuikService) Init() error {
 	quik.writer = transform.NewWriter(quik.mainConn, quikCharmap.NewEncoder())
 
 	// эта горутина завершатся, тк defer quik.Close() закроет callback connection.
+	// даже если не хотим обрабатывать callbacks, то все равно нужно читать сообщения.
 	go func() {
-		quik.handleCallbacks()
+		quik.handleCallbacks(ctx, callbackHandler)
 	}()
 	return nil
 }
@@ -129,7 +133,10 @@ func (quik *QuikService) MakeQuery(cmd string, data any) (ResponseJson, error) {
 	return response, nil
 }
 
-func (quik *QuikService) handleCallbacks() error {
+func (quik *QuikService) handleCallbacks(
+	ctx context.Context,
+	callbackHandler func(context.Context, CallbackJson),
+) error {
 	reader := bufio.NewReader(transform.NewReader(quik.callbackConn, charmap.Windows1251.NewDecoder()))
 	for {
 		incoming, err := reader.ReadString('\n')
@@ -141,8 +148,8 @@ func (quik *QuikService) handleCallbacks() error {
 		if err != nil {
 			return err
 		}
-		if quik.callbackHandler != nil {
-			quik.callbackHandler(callbackJson)
+		if callbackHandler != nil {
+			callbackHandler(ctx, callbackJson)
 		}
 	}
 }
