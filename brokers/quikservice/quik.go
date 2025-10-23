@@ -62,7 +62,10 @@ func (quik *QuikService) Init(
 	// эта горутина завершатся, тк defer quik.Close() закроет callback connection.
 	// даже если не хотим обрабатывать callbacks, то все равно нужно читать сообщения.
 	go func() {
-		quik.handleCallbacks(ctx, callbackHandler)
+		var err = quik.handleCallbacks(ctx, callbackHandler)
+		if err != nil {
+			quik.logger.Println("quik.handleCallbacks", "error", err)
+		}
 	}()
 	return nil
 }
@@ -88,6 +91,9 @@ func timeToQuikTime(time time.Time) int64 {
 
 func (quik *QuikService) MakeQuery(cmd string, data any) (ResponseJson, error) {
 	var incoming, err = quik.ExecuteQuery(cmd, data)
+	if err != nil {
+		return ResponseJson{}, err
+	}
 
 	var response ResponseJson
 	err = json.Unmarshal([]byte(incoming), &response)

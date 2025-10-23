@@ -62,6 +62,9 @@ func (quik *QuikService) GetLastCandles(
 	var incoming, err = quik.ExecuteQuery(
 		"get_candles_from_data_source",
 		fmt.Sprintf("%v|%v|%v|%v", classCode, securityCode, interval, count))
+	if err != nil {
+		return nil, err
+	}
 
 	var response TResponseJson[[]Candle]
 	err = json.Unmarshal([]byte(incoming), &response)

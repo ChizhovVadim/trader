@@ -1,9 +1,6 @@
 package quik
 
 import (
-	"github.com/ChizhovVadim/trader/brokers"
-	"github.com/ChizhovVadim/trader/brokers/quikservice"
-
 	"context"
 	"encoding/json"
 	"errors"
@@ -12,6 +9,9 @@ import (
 	"log/slog"
 	"strconv"
 	"sync/atomic"
+
+	"github.com/ChizhovVadim/trader/brokers"
+	"github.com/ChizhovVadim/trader/brokers/quikservice"
 )
 
 var _ brokers.IBroker = (*QuikBroker)(nil)
