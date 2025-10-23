@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/ChizhovVadim/trader/quikservice"
+	"github.com/ChizhovVadim/trader/brokers/quikservice"
 )
 
 func main() {
@@ -35,13 +35,13 @@ func run(port int) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%#v\n", data)
+	res, _ := quikservice.ParseInt(data.Data)
+	fmt.Println(res == 1)
 
 	data, err = quikService.MessageInfo("Где деньги, Лебовски?")
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%#v\n", data)
 
 	return nil
 }

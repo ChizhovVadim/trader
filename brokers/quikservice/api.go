@@ -1,6 +1,7 @@
 package quikservice
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -57,10 +58,20 @@ func (quik *QuikService) GetLastCandles(
 	securityCode string,
 	interval int,
 	count int,
-) (ResponseJson, error) {
-	return quik.MakeQuery(
+) ([]Candle, error) {
+	var incoming, err = quik.ExecuteQuery(
 		"get_candles_from_data_source",
 		fmt.Sprintf("%v|%v|%v|%v", classCode, securityCode, interval, count))
+
+	var response TResponseJson[[]Candle]
+	err = json.Unmarshal([]byte(incoming), &response)
+	if err != nil {
+		return nil, err
+	}
+	if response.LuaError != "" {
+		return nil, fmt.Errorf("lua error: %v", response.LuaError)
+	}
+	return response.Data, nil
 }
 
 func (quik *QuikService) SubscribeCandles(

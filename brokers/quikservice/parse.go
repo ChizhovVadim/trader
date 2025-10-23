@@ -2,7 +2,6 @@ package quikservice
 
 import (
 	"strconv"
-	"time"
 )
 
 func AsMap(a any) map[string]any {
@@ -45,18 +44,4 @@ func ParseFloat(a any) (float64, bool) {
 	default:
 		return 0, false
 	}
-}
-
-func ParseTime(a any, loc *time.Location) time.Time {
-	var t = AsMap(a)
-	if t == nil {
-		return time.Time{}
-	}
-	var year = t["year"].(int)
-	var month = t["month"].(int)
-	var day = t["day"].(int)
-	var hour = t["hour"].(int)
-	var min = t["min"].(int)
-	var sec = t["sec"].(int)
-	return time.Date(year, time.Month(month), day, hour, min, sec, 0, loc)
 }

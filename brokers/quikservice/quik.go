@@ -87,6 +87,20 @@ func timeToQuikTime(time time.Time) int64 {
 }
 
 func (quik *QuikService) MakeQuery(cmd string, data any) (ResponseJson, error) {
+	var incoming, err = quik.ExecuteQuery(cmd, data)
+
+	var response ResponseJson
+	err = json.Unmarshal([]byte(incoming), &response)
+	if err != nil {
+		return ResponseJson{}, err
+	}
+	if response.LuaError != "" {
+		return ResponseJson{}, fmt.Errorf("lua error: %v", response.LuaError)
+	}
+	return response, nil
+}
+
+func (quik *QuikService) ExecuteQuery(cmd string, data any) (string, error) {
 	quik.mu.Lock()
 	defer quik.mu.Unlock()
 
@@ -100,15 +114,15 @@ func (quik *QuikService) MakeQuery(cmd string, data any) (ResponseJson, error) {
 
 	b, err := json.Marshal(request)
 	if err != nil {
-		return ResponseJson{}, err
+		return "", err
 	}
 	_, err = quik.writer.Write(b)
 	if err != nil {
-		return ResponseJson{}, err
+		return "", err
 	}
 	_, err = quik.writer.Write([]byte("\r\n"))
 	if err != nil {
-		return ResponseJson{}, err
+		return "", err
 	}
 
 	if quik.logger != nil {
@@ -117,20 +131,12 @@ func (quik *QuikService) MakeQuery(cmd string, data any) (ResponseJson, error) {
 
 	incoming, err := quik.reader.ReadString('\n')
 	if err != nil {
-		return ResponseJson{}, err
+		return "", err
 	}
 	if quik.logger != nil && len(incoming) <= 2_048 {
 		quik.logger.Println(incoming)
 	}
-	var response ResponseJson
-	err = json.Unmarshal([]byte(incoming), &response)
-	if err != nil {
-		return ResponseJson{}, err
-	}
-	if response.LuaError != "" {
-		return ResponseJson{}, fmt.Errorf("lua error: %v", response.LuaError)
-	}
-	return response, nil
+	return incoming, nil
 }
 
 func (quik *QuikService) handleCallbacks(
@@ -152,26 +158,4 @@ func (quik *QuikService) handleCallbacks(
 			callbackHandler(ctx, callbackJson)
 		}
 	}
-}
-
-type RequestJson struct {
-	Id          int64  `json:"id"`
-	Command     string `json:"cmd"`
-	CreatedTime int64  `json:"t"`
-	Data        any    `json:"data"`
-}
-
-type ResponseJson struct {
-	Id          int64   `json:"id"`
-	Command     string  `json:"cmd"`
-	CreatedTime float64 `json:"t"`
-	Data        any     `json:"data"`
-	LuaError    string  `json:"lua_error"`
-}
-
-type CallbackJson struct {
-	Command     string  `json:"cmd"`
-	CreatedTime float64 `json:"t"`
-	Data        any     `json:"data"`
-	LuaError    string  `json:"lua_error"`
 }
