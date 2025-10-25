@@ -64,7 +64,10 @@ func (quik *QuikService) Init(
 	go func() {
 		var err = quik.handleCallbacks(ctx, callbackHandler)
 		if err != nil {
-			quik.logger.Println("quik.handleCallbacks", "error", err)
+			if quik.logger != nil {
+				quik.logger.Println("quik.handleCallbacks", "error", err)
+			}
+			return
 		}
 	}()
 	return nil

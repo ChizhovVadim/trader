@@ -1,6 +1,10 @@
 package quik
 
 import (
+	"github.com/ChizhovVadim/trader/pkg/brokers"
+	"github.com/ChizhovVadim/trader/pkg/connectors/quikservice"
+	"github.com/ChizhovVadim/trader/pkg/moex"
+
 	"context"
 	"encoding/json"
 	"errors"
@@ -9,9 +13,6 @@ import (
 	"log/slog"
 	"strconv"
 	"sync/atomic"
-
-	"github.com/ChizhovVadim/trader/brokers"
-	"github.com/ChizhovVadim/trader/brokers/quikservice"
 )
 
 var _ brokers.IBroker = (*QuikBroker)(nil)
@@ -107,14 +108,14 @@ func (b *QuikBroker) GetPortfolioLimits(portfolio brokers.Portfolio) (brokers.Po
 }
 
 func (b *QuikBroker) GetPosition(portfolio brokers.Portfolio, security brokers.Security) (float64, error) {
-	if security.ClassCode == brokers.FuturesClassCode {
+	if security.ClassCode == moex.FuturesClassCode {
 		resp, err := b.quikService.GetFuturesHolding(portfolio.Firm, portfolio.Portfolio, security.Code, 0)
 		if err != nil {
 			return 0, err
 		}
 		var data = quikservice.AsMap(resp.Data)
 		if data == nil {
-			b.logger.Warn("empty position",
+			b.logger.Debug("empty position",
 				"client", portfolio.Client,
 				"portfolio", portfolio.Portfolio,
 				"security", security.Name,
@@ -190,7 +191,7 @@ func (b *QuikBroker) getLastCandles_Impl(security brokers.Security, timeframe st
 	}
 	// последний бар за сегодня может быть не завершен
 	if len(candles) > 0 &&
-		isToday(candles[len(candles)-1].Datetime.ToTime(brokers.Moscow)) {
+		isToday(candles[len(candles)-1].Datetime.ToTime(moex.Moscow)) {
 		candles = candles[:len(candles)-1]
 	}
 	return candles, nil

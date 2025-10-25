@@ -17,7 +17,7 @@ type HistoryCandle struct {
 
 type Candle struct {
 	Interval     string
-	SecurityCode string // or Security
+	SecurityCode string
 	HistoryCandle
 }
 

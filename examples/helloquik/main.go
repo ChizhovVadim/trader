@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/ChizhovVadim/trader/brokers/quikservice"
+	"github.com/ChizhovVadim/trader/pkg/connectors/quikservice"
 )
 
 func main() {

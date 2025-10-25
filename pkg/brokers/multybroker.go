@@ -39,6 +39,7 @@ func (b *MultyBroker) Init(ctx context.Context) error {
 }
 
 func (b *MultyBroker) CheckStatus() {
+	// на golang случайный порядок в map
 	for _, child := range b.brokers {
 		child.CheckStatus()
 	}

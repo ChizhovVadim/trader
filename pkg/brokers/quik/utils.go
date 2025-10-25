@@ -5,8 +5,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ChizhovVadim/trader/brokers"
-	"github.com/ChizhovVadim/trader/brokers/quikservice"
+	"github.com/ChizhovVadim/trader/pkg/brokers"
+	"github.com/ChizhovVadim/trader/pkg/connectors/quikservice"
+	"github.com/ChizhovVadim/trader/pkg/moex"
 )
 
 func calculateStartTransId() int64 {
@@ -29,7 +30,7 @@ func isToday(d time.Time) bool {
 
 func convertToHistoryCandle(item quikservice.Candle) brokers.HistoryCandle {
 	return brokers.HistoryCandle{
-		DateTime:   item.Datetime.ToTime(brokers.Moscow),
+		DateTime:   item.Datetime.ToTime(moex.Moscow),
 		OpenPrice:  item.Open,
 		HighPrice:  item.High,
 		LowPrice:   item.Low,
