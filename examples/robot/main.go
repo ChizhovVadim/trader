@@ -27,7 +27,14 @@ func main() {
 func robotHandler(logger *slog.Logger) error {
 	var trader = strategies.NewTrader(logger)
 	defer trader.Close()
+	var err = configureTrader(logger, trader)
+	if err != nil {
+		return err
+	}
+	return trader.Run(context.Background())
+}
 
+func configureTrader(logger *slog.Logger, trader *strategies.Trader) error {
 	trader.Broker.Add("paper", brokers.NewMockBroker(logger, "paper"))         // Для сделок
 	var marketData = quik.NewQuikBroker(logger, "quik", 34132, trader.Inbox()) // Для получения баров
 	trader.Broker.Add("quik", marketData)
@@ -39,8 +46,10 @@ func robotHandler(logger *slog.Logger) error {
 	trader.AddSignal(strategies.NewSignalService(logger, "signal", marketData, security, "minutes5",
 		&AdvisorSample{}, strategies.SizeConfig{MaxLever: 5, LongLever: 5, ShortLever: 5, Weight: 1}))
 
-	var portfolio = &strategies.Portfolio{Portfolio: brokers.Portfolio{Client: "paper", Portfolio: "test"}}
-	trader.AddPortfolio(strategies.NewPortfolioService(logger, trader.Broker, portfolio, 0, 0))
-	trader.AddStrategy(strategies.NewStrategyService(logger, trader.Broker, portfolio, security, "signal"))
-	return trader.Run(context.Background())
+	trader.AddPortfolio(strategies.NewPortfolioService(logger, trader.Broker,
+		&strategies.Portfolio{Portfolio: brokers.Portfolio{Client: "paper", Portfolio: "test"}},
+		0, 0))
+
+	trader.AddStrategiesForAllSignalPortfolioPairs()
+	return nil
 }

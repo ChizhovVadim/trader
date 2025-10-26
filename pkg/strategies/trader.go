@@ -45,6 +45,15 @@ func (app *Trader) AddStrategy(strategy *StrategyService) {
 	app.strategies = append(app.strategies, strategy)
 }
 
+// Каждый сигнал торгуем в каждом портфеле
+func (app *Trader) AddStrategiesForAllSignalPortfolioPairs() {
+	for _, signal := range app.signals {
+		for _, portfolio := range app.portfolios {
+			app.AddStrategy(NewStrategyService(app.logger, portfolio.broker, portfolio.portfolio, signal.security, signal.name))
+		}
+	}
+}
+
 func (app *Trader) AddPortfolio(portfolio *PortfolioService) {
 	app.portfolios = append(app.portfolios, portfolio)
 }
