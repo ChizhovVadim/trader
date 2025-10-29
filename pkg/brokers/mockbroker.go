@@ -17,6 +17,9 @@ type MockBroker struct {
 }
 
 func NewMockBroker(logger *slog.Logger, name string) *MockBroker {
+	logger = logger.With(
+		"client", name,
+		"type", "mock")
 	return &MockBroker{
 		logger:    logger,
 		name:      name,
@@ -25,6 +28,7 @@ func NewMockBroker(logger *slog.Logger, name string) *MockBroker {
 }
 
 func (b *MockBroker) Init(context.Context) error {
+	b.logger.Info("Init broker")
 	return nil
 }
 
@@ -44,7 +48,6 @@ func (b *MockBroker) GetPosition(portfolio Portfolio, security Security) (float6
 
 func (b *MockBroker) RegisterOrder(order Order) error {
 	b.logger.Info("RegisterOrder",
-		"client", order.Portfolio.Client,
 		"portfolio", order.Portfolio.Portfolio,
 		"security", order.Security.Name,
 		"volume", order.Volume,

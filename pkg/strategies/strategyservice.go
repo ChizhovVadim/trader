@@ -64,7 +64,7 @@ func (s *StrategyService) CheckStatus() {
 	} else {
 		status = "!"
 	}
-	fmt.Printf("%10v %10v %10v planned: %6v broker: %6v %v\n",
+	fmt.Printf("%10v %10v %10v planned: %6v actual: %6v %v\n",
 		s.portfolio.Portfolio.Client,
 		s.portfolio.Portfolio.Portfolio,
 		s.security.Name,

@@ -13,3 +13,7 @@ func initMoscow() *time.Location {
 	}
 	return loc
 }
+
+func IsMainFortsSession(d time.Time) bool {
+	return d.Hour() >= 10 && d.Hour() <= 18
+}

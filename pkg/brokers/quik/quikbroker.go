@@ -32,6 +32,9 @@ func NewQuikBroker(
 	port int,
 	marketDataCallbacks chan<- any,
 ) *QuikBroker {
+	logger = logger.With(
+		"client", name,
+		"type", "quik")
 	return &QuikBroker{
 		logger:              logger,
 		name:                name,
@@ -72,6 +75,7 @@ func (b *QuikBroker) Init(ctx context.Context) error {
 	if !(res == 1) {
 		return errors.New("trader is not connected")
 	}
+	b.logger.Info("Init broker")
 	return nil
 }
 
@@ -135,7 +139,6 @@ func (b *QuikBroker) GetPosition(portfolio brokers.Portfolio, security brokers.S
 func (b *QuikBroker) RegisterOrder(order brokers.Order) error {
 	var sPrice = formatPrice(order.Security.PriceStep, order.Security.PricePrecision, order.Price)
 	b.logger.Info("RegisterOrder",
-		"client", order.Portfolio.Client,
 		"portfolio", order.Portfolio.Portfolio,
 		"security", order.Security.Name,
 		"volume", order.Volume,

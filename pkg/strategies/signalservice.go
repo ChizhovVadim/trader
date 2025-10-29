@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/ChizhovVadim/trader/pkg/brokers"
+	"github.com/ChizhovVadim/trader/pkg/moex"
 )
 
 type Signal struct {
@@ -60,6 +61,11 @@ func (s *SignalService) Init() error {
 	if err := s.AddHistoryCandles(s.marketData.GetLastCandles(s.security, s.candleInterval)); err != nil {
 		return err
 	}
+	s.logger.Info("Init signal",
+		"DateTime", s.lastSignal.DateTime,
+		"Price", s.lastSignal.Price,
+		"Prediction", s.lastSignal.Prediction,
+	)
 	// тк можем подписаться на несколько инструментов,
 	// то подписываемся в отдельной горутине,
 	// чтобы сразу начать читать бары из первой подписки и не заблокироваться.
@@ -92,7 +98,11 @@ func (s *SignalService) OnCandle(candle brokers.Candle) Signal {
 	if !s.ind.Add(candle.DateTime, candle.ClosePrice) {
 		return Signal{}
 	}
-	var freshCandle = candle.DateTime.After(s.start) // TODO and main forts session?
+	// пока так
+	if !moex.IsMainFortsSession(candle.DateTime) {
+		return Signal{}
+	}
+	var freshCandle = candle.DateTime.After(s.start)
 	if s.baseCandle.DateTime.IsZero() && freshCandle {
 		s.baseCandle = candle
 		s.logger.Debug("Init base price",
@@ -133,14 +143,16 @@ func (s *SignalService) AddHistoryCandles(historyCandles iter.Seq2[brokers.Histo
 		if err != nil {
 			return err
 		}
-		if !s.ind.Add(candle.DateTime, candle.ClosePrice) {
-			continue
-		}
+
 		if size == 0 {
 			firstCandle = candle
 		}
-		size += 1
 		lastCandle = candle
+		size += 1
+
+		if s.ind.Add(candle.DateTime, candle.ClosePrice) {
+			s.lastSignal = s.makeSignal(candle.DateTime, candle.ClosePrice)
+		}
 	}
 	if size == 0 {
 		s.logger.Warn("History candles empty")
@@ -149,12 +161,6 @@ func (s *SignalService) AddHistoryCandles(historyCandles iter.Seq2[brokers.Histo
 			"First", firstCandle,
 			"Last", lastCandle,
 			"Size", size)
-		s.lastSignal = s.makeSignal(lastCandle.DateTime, lastCandle.ClosePrice)
-		s.logger.Info("Init signal",
-			"DateTime", s.lastSignal.DateTime,
-			"Price", s.lastSignal.Price,
-			"Prediction", s.lastSignal.Prediction,
-		)
 	}
 	return nil
 }
